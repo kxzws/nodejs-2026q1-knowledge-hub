@@ -55,6 +55,15 @@ export class CommentsService {
     return sortedComments;
   }
 
+  getById(id: string) {
+    const comment = this.comments.get(id);
+
+    if (!comment)
+      throw new NotFoundException(`Comment with ID ${id} not found`);
+
+    return comment;
+  }
+
   create(dto: CreateCommentDto) {
     const { content, articleId, authorId } = dto;
 

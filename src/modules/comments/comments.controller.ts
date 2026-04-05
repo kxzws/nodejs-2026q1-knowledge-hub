@@ -29,6 +29,12 @@ export class CommentsController {
     return this.commentsService.getAllByArticleId(query);
   }
 
+  @Get(':id')
+  @ApiResponse({ status: 200, type: SwaggerComment })
+  getById(@Param('id', new ParseUUIDPipe()) id: string) {
+    return this.commentsService.getById(id);
+  }
+
   @Post()
   @ApiResponse({ status: 201, type: SwaggerComment })
   create(@Body() createCommentDto: CreateCommentDto) {
