@@ -46,7 +46,7 @@ export class ArticlesService {
     return newArticle;
   }
 
-  updateArticle(id: string, dto: UpdateArticleDto) {
+  update(id: string, dto: UpdateArticleDto) {
     const article = this.getById(id);
 
     const timestamp = Date.now();

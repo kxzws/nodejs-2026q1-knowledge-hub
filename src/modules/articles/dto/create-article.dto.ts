@@ -12,6 +12,7 @@ import { Status } from '../entities/article.entity';
 
 export class CreateArticleDto {
   @IsString()
+  @IsNotEmpty()
   @MinLength(3)
   title: string;
 

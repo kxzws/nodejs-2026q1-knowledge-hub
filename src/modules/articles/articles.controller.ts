@@ -35,11 +35,11 @@ export class ArticlesController {
   }
 
   @Put(':id')
-  updateArticle(
+  update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() updateArticleDto: UpdateArticleDto,
   ) {
-    return this.articlesService.updateArticle(id, updateArticleDto);
+    return this.articlesService.update(id, updateArticleDto);
   }
 
   @Delete(':id')
