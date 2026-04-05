@@ -26,7 +26,7 @@ export class CommentsController {
   @Get()
   @ApiResponse({ status: 200, type: [SwaggerComment] })
   getAllByArticleId(@Query() query: GetCommentsQueryDto) {
-    return this.commentsService.getAllByArticleId(query.articleId);
+    return this.commentsService.getAllByArticleId(query);
   }
 
   @Post()

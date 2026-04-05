@@ -8,6 +8,7 @@ import {
   Delete,
   HttpCode,
   Put,
+  Query,
 } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 
@@ -15,6 +16,7 @@ import { CategoriesService } from './categories.service';
 
 import { SwaggerCategory } from './entities/category.entity';
 
+import { GetCategoriesQueryDto } from './dto/get-categories.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 
@@ -25,8 +27,8 @@ export class CategoriesController {
 
   @Get()
   @ApiResponse({ status: 200, type: [SwaggerCategory] })
-  getAll() {
-    return this.categoriesService.getAll();
+  getAll(@Query() query: GetCategoriesQueryDto) {
+    return this.categoriesService.getAll(query);
   }
 
   @Get(':id')

@@ -8,10 +8,14 @@ import { OnEvent } from '@nestjs/event-emitter';
 
 import { Comment } from './entities/comment.entity';
 
+import { GetCommentsQueryDto } from './dto/get-comments-query.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
 
 import { ArticlesService } from '../articles/articles.service';
 import { UsersService } from '../users/users.service';
+
+import { SortOrder } from 'src/types';
+import { getSortCb } from 'src/utils/sort';
 
 @Injectable()
 export class CommentsService {
@@ -26,7 +30,12 @@ export class CommentsService {
     return Array.from(this.comments.values());
   }
 
-  getAllByArticleId(articleId: string) {
+  getAllByArticleId(query: GetCommentsQueryDto) {
+    const { articleId } = query;
+
+    const order = query.order ?? SortOrder.DESC;
+    const sortBy = query.sortBy ?? 'createdAt';
+
     const articleExists = this.articlesService.exists(articleId);
 
     if (!articleExists) {
@@ -39,7 +48,11 @@ export class CommentsService {
       (comment) => comment.articleId === articleId,
     );
 
-    return filteredComments;
+    const sortedComments = [...filteredComments].sort(
+      getSortCb<Comment>({ order, sortBy }),
+    );
+
+    return sortedComments;
   }
 
   create(dto: CreateCommentDto) {
@@ -105,7 +118,7 @@ export class CommentsService {
   handleArticleDeleted(payload: { articleId: string }) {
     const { articleId } = payload;
 
-    const articleComments = this.getAllByArticleId(articleId);
+    const articleComments = this.getAllByArticleId({ articleId });
 
     if (articleComments.length) {
       articleComments.forEach(({ id }) => {

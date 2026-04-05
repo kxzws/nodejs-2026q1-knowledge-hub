@@ -9,11 +9,15 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 
 import { Role, User } from './entities/user.entity';
 
+import { GetUsersQueryDto } from './dto/get-users.query.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 
+import { SortOrder } from 'src/types';
+
 import { getHash } from 'src/utils/hash';
 import { getUserWoPassword } from 'src/utils/user';
+import { getSortCb } from 'src/utils/sort';
 
 @Injectable()
 export class UsersService {
@@ -21,8 +25,15 @@ export class UsersService {
 
   constructor(private eventEmitter: EventEmitter2) {}
 
-  getAll() {
-    return Array.from(this.users.values()).map(getUserWoPassword);
+  getAll(query: GetUsersQueryDto) {
+    const order = query.order ?? SortOrder.DESC;
+    const sortBy = query.sortBy ?? 'createdAt';
+
+    const sortedUsers = Array.from(this.users.values()).sort(
+      getSortCb<User>({ order, sortBy }),
+    );
+
+    return sortedUsers.map(getUserWoPassword);
   }
 
   getById(id: string) {
@@ -40,7 +51,7 @@ export class UsersService {
   create(dto: CreateUserDto) {
     const { login, password, role } = dto;
 
-    const users = this.getAll();
+    const users = this.getAll({});
 
     if (
       users.some(

@@ -15,6 +15,9 @@ import { UpdateArticleDto } from './dto/update-article.dto';
 import { CategoriesService } from '../categories/categories.service';
 import { UsersService } from '../users/users.service';
 
+import { SortOrder } from 'src/types';
+import { getSortCb } from 'src/utils/sort';
+
 @Injectable()
 export class ArticlesService {
   private articles = new Map<string, Article>();
@@ -28,12 +31,21 @@ export class ArticlesService {
   getAll(query: GetArticlesQueryDto) {
     const { status, categoryId, tag } = query;
 
-    return Array.from(this.articles.values()).filter(
+    const order = query.order ?? SortOrder.DESC;
+    const sortBy = query.sortBy ?? 'createdAt';
+
+    const filteredArticles = Array.from(this.articles.values()).filter(
       (article) =>
         (!status || article.status === status) &&
         (!categoryId || article.categoryId === categoryId) &&
         (!tag || article.tags.includes(tag)),
     );
+
+    const sortedArticles = [...filteredArticles].sort(
+      getSortCb<Article>({ order, sortBy }),
+    );
+
+    return sortedArticles;
   }
 
   getById(id: string) {

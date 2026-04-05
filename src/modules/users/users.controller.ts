@@ -8,6 +8,7 @@ import {
   Delete,
   HttpCode,
   Put,
+  Query,
 } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 
@@ -15,6 +16,7 @@ import { UsersService } from './users.service';
 
 import { OmittedSwaggerUser } from './entities/user.entity';
 
+import { GetUsersQueryDto } from './dto/get-users.query.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 
@@ -25,8 +27,8 @@ export class UsersController {
 
   @Get()
   @ApiResponse({ status: 200, type: [OmittedSwaggerUser] })
-  getAll() {
-    return this.usersService.getAll();
+  getAll(@Query() query: GetUsersQueryDto) {
+    return this.usersService.getAll(query);
   }
 
   @Get(':id')

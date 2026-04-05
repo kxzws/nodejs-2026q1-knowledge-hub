@@ -4,8 +4,12 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 
 import { Category } from './entities/category.entity';
 
+import { GetCategoriesQueryDto } from './dto/get-categories.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+
+import { SortOrder } from 'src/types';
+import { getSortCb } from 'src/utils/sort';
 
 @Injectable()
 export class CategoriesService {
@@ -13,8 +17,15 @@ export class CategoriesService {
 
   constructor(private eventEmitter: EventEmitter2) {}
 
-  getAll() {
-    return Array.from(this.categories.values());
+  getAll(query: GetCategoriesQueryDto) {
+    const order = query.order ?? SortOrder.ASC;
+    const sortBy = query.sortBy ?? 'name';
+
+    const sortedCategories = Array.from(this.categories.values()).sort(
+      getSortCb<Category>({ order, sortBy }),
+    );
+
+    return sortedCategories;
   }
 
   getById(id: string) {
