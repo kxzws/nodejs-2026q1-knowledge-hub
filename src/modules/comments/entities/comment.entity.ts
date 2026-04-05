@@ -5,3 +5,11 @@ export interface Comment {
   authorId: string | null; // refers to User
   createdAt: number; // timestamp of creation
 }
+
+export class SwaggerComment implements Comment {
+  id: string;
+  content: string;
+  articleId: string;
+  authorId: string | null;
+  createdAt: number;
+}

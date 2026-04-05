@@ -15,3 +15,15 @@ export interface Article {
   createdAt: number; // timestamp of creation
   updatedAt: number; // timestamp of last update
 }
+
+export class SwaggerArticle implements Article {
+  id: string;
+  title: string;
+  content: string;
+  status: Status;
+  authorId: string | null;
+  categoryId: string | null;
+  tags: string[];
+  createdAt: number;
+  updatedAt: number;
+}

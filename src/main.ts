@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
@@ -22,6 +23,20 @@ async function bootstrap() {
     }),
   );
   // app.useGlobalFilters(new NotFoundExceptionFilter());
+
+  const config = new DocumentBuilder()
+    .setTitle('Knowledge Hub API')
+    .setDescription('The Knowledge Hub platform API description')
+    .setVersion('1.0')
+    .addTag('Users')
+    .addTag('Articles')
+    .addTag('Categories')
+    .addTag('Comments')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+
+  SwaggerModule.setup('doc', app, document);
 
   await app.listen(port);
 

@@ -9,22 +9,28 @@ import {
   HttpCode,
   Query,
 } from '@nestjs/common';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { CommentsService } from './comments.service';
+
+import { SwaggerComment } from './entities/comment.entity';
 
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { GetCommentsQueryDto } from './dto/get-comments-query.dto';
 
+@ApiTags('Comments')
 @Controller('comment')
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
   @Get()
+  @ApiResponse({ status: 200, type: [SwaggerComment] })
   getAllByArticleId(@Query() query: GetCommentsQueryDto) {
     return this.commentsService.getAllByArticleId(query.articleId);
   }
 
   @Post()
+  @ApiResponse({ status: 201, type: SwaggerComment })
   create(@Body() createCommentDto: CreateCommentDto) {
     return this.commentsService.create(createCommentDto);
   }
