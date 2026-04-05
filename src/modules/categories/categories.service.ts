@@ -23,6 +23,10 @@ export class CategoriesService {
     return category;
   }
 
+  exists(id: string) {
+    return this.categories.has(id);
+  }
+
   create(dto: CreateCategoryDto) {
     const { name, description } = dto;
 

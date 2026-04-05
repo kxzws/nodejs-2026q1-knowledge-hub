@@ -29,6 +29,10 @@ export class UsersService {
     return getUserWoPassword(user);
   }
 
+  exists(id: string) {
+    return this.users.has(id);
+  }
+
   create(dto: CreateUserDto) {
     const { login, password, role } = dto;
 
