@@ -1,15 +1,17 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
 import { AppModule } from './app.module';
-import { NotFoundExceptionFilter } from './common/filters/not-found.filter';
-
-const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
+// import { NotFoundExceptionFilter } from './common/filters/not-found.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  const configService = app.get(ConfigService);
+  const port = configService.get<number>('PORT') || 3000;
 
   app.useGlobalInterceptors(new LoggingInterceptor());
   app.useGlobalPipes(
@@ -19,9 +21,11 @@ async function bootstrap() {
       transform: true,
     }),
   );
-  app.useGlobalFilters(new NotFoundExceptionFilter());
+  // app.useGlobalFilters(new NotFoundExceptionFilter());
 
-  await app.listen(PORT);
+  await app.listen(port);
+
+  console.log(`\nApplication is running on: http://localhost:${port}`);
 }
 
 bootstrap();

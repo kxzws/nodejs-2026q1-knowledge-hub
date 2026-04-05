@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import {
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -36,6 +37,17 @@ export class UsersService {
   create(dto: CreateUserDto) {
     const { login, password, role } = dto;
 
+    const users = this.getAll();
+
+    if (
+      users.some(
+        (user) =>
+          user.login.trim().toLowerCase() === login.trim().toLowerCase(),
+      )
+    ) {
+      throw new ConflictException(`User with such login already exists`);
+    }
+
     const timestamp = Date.now();
 
     const newUser = {
@@ -68,7 +80,7 @@ export class UsersService {
         updatedAt: timestamp,
       });
 
-      return this.users.get(user.id);
+      return getUserWoPassword(this.users.get(user.id));
     }
 
     throw new ForbiddenException('Old password does not match');
