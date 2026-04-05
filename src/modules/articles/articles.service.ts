@@ -4,9 +4,11 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 
 import { Article, Status } from './entities/article.entity';
 
+import { GetArticlesQueryDto } from './dto/get-articles-query.dto';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 
@@ -18,13 +20,20 @@ export class ArticlesService {
   private articles = new Map<string, Article>();
 
   constructor(
+    private eventEmitter: EventEmitter2,
     private readonly categorisService: CategoriesService,
     private readonly usersService: UsersService,
   ) {}
 
-  // TODO: Supports optional query parameters for filtering: status, categoryId, tag (e.g. GET /article?status=published&tag=nodejs)
-  getAll() {
-    return Array.from(this.articles.values());
+  getAll(query: GetArticlesQueryDto) {
+    const { status, categoryId, tag } = query;
+
+    return Array.from(this.articles.values()).filter(
+      (article) =>
+        (!status || article.status === status) &&
+        (!categoryId || article.categoryId === categoryId) &&
+        (!tag || article.tags.includes(tag)),
+    );
   }
 
   getById(id: string) {
@@ -94,8 +103,38 @@ export class ArticlesService {
   delete(id: string) {
     this.getById(id);
 
+    this.eventEmitter.emit('article.deleted', { articleId: id });
+
     this.articles.delete(id);
 
     return;
+  }
+
+  @OnEvent('user.deleted')
+  handleAuthorDeleted(payload: { authorId: string }) {
+    const { authorId } = payload;
+
+    const articlesWithAuthor = this.getAll({}).filter(
+      (article) => article.authorId === authorId,
+    );
+
+    if (articlesWithAuthor.length) {
+      articlesWithAuthor.forEach(({ id }) => {
+        this.update(id, { authorId: null });
+      });
+    }
+  }
+
+  @OnEvent('category.deleted')
+  handleCategoryDeleted(payload: { categoryId: string }) {
+    const { categoryId } = payload;
+
+    const articlesWithCategory = this.getAll({ categoryId });
+
+    if (articlesWithCategory.length) {
+      articlesWithCategory.forEach(({ id }) => {
+        this.update(id, { categoryId: null });
+      });
+    }
   }
 }

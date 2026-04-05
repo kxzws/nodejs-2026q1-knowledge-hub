@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 import { Category } from './entities/category.entity';
 
@@ -9,6 +10,8 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 @Injectable()
 export class CategoriesService {
   private categories = new Map<string, Category>();
+
+  constructor(private eventEmitter: EventEmitter2) {}
 
   getAll() {
     return Array.from(this.categories.values());
@@ -54,6 +57,8 @@ export class CategoriesService {
 
   delete(id: string) {
     this.getById(id);
+
+    this.eventEmitter.emit('category.deleted', { categoryId: id });
 
     this.categories.delete(id);
 

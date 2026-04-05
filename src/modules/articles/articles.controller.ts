@@ -8,10 +8,12 @@ import {
   Delete,
   HttpCode,
   Put,
+  Query,
 } from '@nestjs/common';
 
 import { ArticlesService } from './articles.service';
 
+import { GetArticlesQueryDto } from './dto/get-articles-query.dto';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 
@@ -20,8 +22,8 @@ export class ArticlesController {
   constructor(private readonly articlesService: ArticlesService) {}
 
   @Get()
-  getAll() {
-    return this.articlesService.getAll();
+  getAll(@Query() query: GetArticlesQueryDto) {
+    return this.articlesService.getAll(query);
   }
 
   @Get(':id')

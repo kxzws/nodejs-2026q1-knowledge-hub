@@ -5,6 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 import { Role, User } from './entities/user.entity';
 
@@ -17,6 +18,8 @@ import { getUserWoPassword } from 'src/utils/user';
 @Injectable()
 export class UsersService {
   private users = new Map<string, User>();
+
+  constructor(private eventEmitter: EventEmitter2) {}
 
   getAll() {
     return Array.from(this.users.values()).map(getUserWoPassword);
@@ -88,6 +91,8 @@ export class UsersService {
 
   delete(id: string) {
     this.getById(id);
+
+    this.eventEmitter.emit('user.deleted', { authorId: id });
 
     this.users.delete(id);
 

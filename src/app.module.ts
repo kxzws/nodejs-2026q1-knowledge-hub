@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 import { ArticlesModule } from './modules/articles/articles.module';
 import { CategoriesModule } from './modules/categories/categories.module';
@@ -14,6 +15,7 @@ import { AppService } from './app.service';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    EventEmitterModule.forRoot(),
     UsersModule,
     ArticlesModule,
     CategoriesModule,
