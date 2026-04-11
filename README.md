@@ -77,8 +77,38 @@ npm run lint
 npm run format
 ```
 
-### Debugging in VSCode
+## Docker
 
-Press <kbd>F5</kbd> to debug.
+### Image build
 
-For more information, visit: https://code.visualstudio.com/docs/editor/debugging
+```
+docker build -t knowledge-hub-app .
+```
+or
+```
+docker-compose up --build
+```
+
+### Container start
+
+```
+docker run -p 4000:4000 --env-file .env knowledge-hub-app
+```
+
+### Composed container start
+
+```
+docker-compose up --build
+```
+or with Adminer
+```
+docker-compose --profile debug up --build
+```
+
+### Docker Hub image
+[Image link](https://hub.docker.com/r/kxzws/nodejs-2026q1-knowledge-hub)
+
+To pull the image:
+```
+docker pull kxzws/nodejs-2026q1-knowledge-hub:latest
+```
