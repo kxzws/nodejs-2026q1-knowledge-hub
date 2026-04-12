@@ -5,8 +5,10 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
-import { AppModule } from './app.module';
 // import { NotFoundExceptionFilter } from './common/filters/not-found.filter';
+import { PrismaClientExceptionFilter } from './common/filters/prisma-client-exception.filter';
+
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -22,6 +24,7 @@ async function bootstrap() {
     }),
   );
   // app.useGlobalFilters(new NotFoundExceptionFilter());
+  app.useGlobalFilters(new PrismaClientExceptionFilter());
 
   const config = new DocumentBuilder()
     .setTitle('Knowledge Hub API')

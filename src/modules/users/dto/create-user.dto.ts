@@ -6,7 +6,7 @@ import {
   MinLength,
 } from 'class-validator';
 
-import { Role } from '../entities/user.entity';
+import { Role } from '../../../../generated/prisma/enums';
 
 export class CreateUserDto {
   @IsString()

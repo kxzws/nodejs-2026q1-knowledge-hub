@@ -1,106 +1,100 @@
-import { randomUUID } from 'node:crypto';
 import {
-  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 
-import { Role, User } from './entities/user.entity';
-
 import { GetUsersQueryDto } from './dto/get-users.query.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 
+import { PrismaService } from 'src/prisma/prisma.service';
+
 import { SortOrder } from 'src/types';
 
 import { getHash } from 'src/utils/hash';
-import { getUserWoPassword } from 'src/utils/user';
-import { getSortCb } from 'src/utils/sort';
 
 @Injectable()
 export class UsersService {
-  private users = new Map<string, User>();
+  constructor(private readonly prisma: PrismaService) {}
 
-  getAll(query: GetUsersQueryDto) {
+  async getAll(query: GetUsersQueryDto) {
     const order = query.order ?? SortOrder.DESC;
     const sortBy = query.sortBy ?? 'createdAt';
 
-    const sortedUsers = Array.from(this.users.values()).sort(
-      getSortCb<User>({ order, sortBy }),
-    );
-
-    return sortedUsers.map(getUserWoPassword);
+    return await this.prisma.user.findMany({
+      orderBy: {
+        [sortBy]: order,
+      },
+      omit: {
+        password: true,
+      },
+    });
   }
 
-  getById(id: string) {
-    const user = this.users.get(id);
+  async getById(id: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      omit: {
+        password: true,
+      },
+    });
 
     if (!user) throw new NotFoundException(`User with ID ${id} not found`);
 
-    return getUserWoPassword(user);
+    return user;
   }
 
-  exists(id: string) {
-    return this.users.has(id);
+  async exists(id: string) {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+
+    return !!user;
   }
 
-  create(dto: CreateUserDto) {
-    const { login, password, role } = dto;
+  async create(dto: CreateUserDto) {
+    const { password } = dto;
 
-    const users = this.getAll({});
-
-    if (
-      users.some(
-        (user) =>
-          user.login.trim().toLowerCase() === login.trim().toLowerCase(),
-      )
-    ) {
-      throw new ConflictException(`User with such login already exists`);
-    }
-
-    const timestamp = Date.now();
-
-    const newUser = {
-      id: randomUUID(),
-      login,
-      password: getHash(password),
-      role: role ?? Role.VIEWER,
-      createdAt: timestamp,
-      updatedAt: timestamp,
-    };
-
-    this.users.set(newUser.id, newUser);
-
-    return getUserWoPassword(newUser);
+    return await this.prisma.user.create({
+      data: {
+        ...dto,
+        password: getHash(password),
+      },
+      omit: {
+        password: true,
+      },
+    });
   }
 
-  updatePassword(id: string, dto: UpdatePasswordDto) {
+  async updatePassword(id: string, dto: UpdatePasswordDto) {
     const { oldPassword, newPassword } = dto;
 
-    const user = this.users.get(id);
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+    });
 
     if (!user) throw new NotFoundException(`User with ID ${id} not found`);
 
     if (user.password === getHash(oldPassword)) {
-      const timestamp = Date.now();
-
-      this.users.set(user.id, {
-        ...user,
-        password: getHash(newPassword),
-        updatedAt: timestamp,
+      return await this.prisma.user.update({
+        where: { id },
+        data: {
+          password: getHash(newPassword),
+        },
+        omit: {
+          password: true,
+        },
       });
-
-      return getUserWoPassword(this.users.get(user.id));
     }
 
     throw new ForbiddenException('Old password does not match');
   }
 
-  delete(id: string) {
-    this.getById(id);
+  async delete(id: string) {
+    await this.getById(id);
 
-    this.users.delete(id);
+    await this.prisma.user.delete({
+      where: { id },
+    });
 
     return;
   }
