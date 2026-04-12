@@ -4,6 +4,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
+import { Status } from '../../../generated/prisma/enums';
+
 import { GetUsersQueryDto } from './dto/get-users.query.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
@@ -108,10 +110,17 @@ export class UsersService {
   async delete(id: string) {
     await this.getById(id);
 
-    await this.prisma.user.delete({
-      where: { id },
-    });
+    return await this.prisma.$transaction(async (tx) => {
+      await tx.article.updateMany({
+        where: { authorId: id },
+        data: { status: Status.DRAFT },
+      });
 
-    return;
+      await tx.user.delete({
+        where: { id },
+      });
+
+      return;
+    });
   }
 }
