@@ -54,6 +54,8 @@ export class UsersService {
   }
 
   async exists(id: string) {
+    if (!id) return false;
+
     const user = await this.prisma.user.findUnique({
       where: { id },
     });

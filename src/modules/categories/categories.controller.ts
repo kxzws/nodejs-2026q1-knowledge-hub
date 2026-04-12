@@ -27,34 +27,34 @@ export class CategoriesController {
 
   @Get()
   @ApiResponse({ status: 200, type: [SwaggerCategory] })
-  getAll(@Query() query: GetCategoriesQueryDto) {
-    return this.categoriesService.getAll(query);
+  async getAll(@Query() query: GetCategoriesQueryDto) {
+    return await this.categoriesService.getAll(query);
   }
 
   @Get(':id')
   @ApiResponse({ status: 200, type: SwaggerCategory })
-  getById(@Param('id', new ParseUUIDPipe()) id: string) {
-    return this.categoriesService.getById(id);
+  async getById(@Param('id', new ParseUUIDPipe()) id: string) {
+    return await this.categoriesService.getById(id);
   }
 
   @Post()
   @ApiResponse({ status: 201, type: SwaggerCategory })
-  create(@Body() createCategoryDto: CreateCategoryDto) {
-    return this.categoriesService.create(createCategoryDto);
+  async create(@Body() createCategoryDto: CreateCategoryDto) {
+    return await this.categoriesService.create(createCategoryDto);
   }
 
   @Put(':id')
   @ApiResponse({ status: 200, type: SwaggerCategory })
-  update(
+  async update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
   ) {
-    return this.categoriesService.update(id, updateCategoryDto);
+    return await this.categoriesService.update(id, updateCategoryDto);
   }
 
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id', new ParseUUIDPipe()) id: string) {
-    return this.categoriesService.delete(id);
+  async remove(@Param('id', new ParseUUIDPipe()) id: string) {
+    return await this.categoriesService.delete(id);
   }
 }

@@ -58,6 +58,8 @@ export class ArticlesService {
   }
 
   async exists(id: string) {
+    if (!id) return false;
+
     const article = this.prisma.article.findUnique({ where: { id } });
 
     return !!article;
