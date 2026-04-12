@@ -10,6 +10,9 @@ export class PrismaService extends PrismaClient {
     const connectionString = `${process.env.DATABASE_URL}`;
     const adapter = new PrismaPg({ connectionString });
 
-    super({ adapter });
+    super({
+      adapter,
+      // log: ['query', 'info', 'warn', 'error'],
+    });
   }
 }
