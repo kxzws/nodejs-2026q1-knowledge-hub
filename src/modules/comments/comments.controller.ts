@@ -25,25 +25,25 @@ export class CommentsController {
 
   @Get()
   @ApiResponse({ status: 200, type: [SwaggerComment] })
-  getAllByArticleId(@Query() query: GetCommentsQueryDto) {
-    return this.commentsService.getAllByArticleId(query);
+  async getAllByArticleId(@Query() query: GetCommentsQueryDto) {
+    return await this.commentsService.getAllByArticleId(query);
   }
 
   @Get(':id')
   @ApiResponse({ status: 200, type: SwaggerComment })
-  getById(@Param('id', new ParseUUIDPipe()) id: string) {
-    return this.commentsService.getById(id);
+  async getById(@Param('id', new ParseUUIDPipe()) id: string) {
+    return await this.commentsService.getById(id);
   }
 
   @Post()
   @ApiResponse({ status: 201, type: SwaggerComment })
-  create(@Body() createCommentDto: CreateCommentDto) {
-    return this.commentsService.create(createCommentDto);
+  async create(@Body() createCommentDto: CreateCommentDto) {
+    return await this.commentsService.create(createCommentDto);
   }
 
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id', new ParseUUIDPipe()) id: string) {
-    return this.commentsService.delete(id);
+  async remove(@Param('id', new ParseUUIDPipe()) id: string) {
+    return await this.commentsService.delete(id);
   }
 }

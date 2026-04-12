@@ -11,6 +11,7 @@ import { GetArticlesQueryDto } from './dto/get-articles-query.dto';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 
+import { PrismaService } from '../../prisma/prisma.service';
 import { CategoriesService } from '../categories/categories.service';
 import { UsersService } from '../users/users.service';
 
@@ -22,6 +23,7 @@ export class ArticlesService {
   private articles = new Map<string, Article>();
 
   constructor(
+    private readonly prisma: PrismaService,
     private readonly categorisService: CategoriesService,
     private readonly usersService: UsersService,
   ) {}
@@ -55,8 +57,10 @@ export class ArticlesService {
     return article;
   }
 
-  exists(id: string) {
-    return this.articles.has(id);
+  async exists(id: string) {
+    const article = this.prisma.article.findUnique({ where: { id } });
+
+    return !!article;
   }
 
   create(dto: CreateArticleDto) {

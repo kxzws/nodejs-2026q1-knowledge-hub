@@ -29,6 +29,10 @@ export class UsersService {
       omit: {
         password: true,
       },
+      // include: {
+      //   articles: true,
+      //   comments: true,
+      // },
     });
   }
 
@@ -38,6 +42,10 @@ export class UsersService {
       omit: {
         password: true,
       },
+      include: {
+        articles: true,
+        comments: true,
+      },
     });
 
     if (!user) throw new NotFoundException(`User with ID ${id} not found`);
@@ -46,7 +54,9 @@ export class UsersService {
   }
 
   async exists(id: string) {
-    const user = await this.prisma.user.findUnique({ where: { id } });
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+    });
 
     return !!user;
   }
@@ -82,6 +92,10 @@ export class UsersService {
         },
         omit: {
           password: true,
+        },
+        include: {
+          articles: true,
+          comments: true,
         },
       });
     }
