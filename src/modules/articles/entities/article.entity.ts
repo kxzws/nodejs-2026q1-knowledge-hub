@@ -1,8 +1,4 @@
-export enum Status {
-  DRAFT = 'draft',
-  PUBLISHED = 'published',
-  ARCHIVED = 'archived',
-}
+import { Status } from '../../../../generated/prisma/enums';
 
 export interface Article {
   id: string; // uuid v4

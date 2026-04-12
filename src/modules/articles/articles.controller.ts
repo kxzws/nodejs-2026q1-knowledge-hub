@@ -27,34 +27,34 @@ export class ArticlesController {
 
   @Get()
   @ApiResponse({ status: 200, type: [SwaggerArticle] })
-  getAll(@Query() query: GetArticlesQueryDto) {
-    return this.articlesService.getAll(query);
+  async getAll(@Query() query: GetArticlesQueryDto) {
+    return await this.articlesService.getAll(query);
   }
 
   @Get(':id')
   @ApiResponse({ status: 200, type: SwaggerArticle })
-  getById(@Param('id', new ParseUUIDPipe()) id: string) {
-    return this.articlesService.getById(id);
+  async getById(@Param('id', new ParseUUIDPipe()) id: string) {
+    return await this.articlesService.getById(id);
   }
 
   @Post()
   @ApiResponse({ status: 201, type: SwaggerArticle })
-  create(@Body() createArticleDto: CreateArticleDto) {
-    return this.articlesService.create(createArticleDto);
+  async create(@Body() createArticleDto: CreateArticleDto) {
+    return await this.articlesService.create(createArticleDto);
   }
 
   @Put(':id')
   @ApiResponse({ status: 200, type: SwaggerArticle })
-  update(
+  async update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() updateArticleDto: UpdateArticleDto,
   ) {
-    return this.articlesService.update(id, updateArticleDto);
+    return await this.articlesService.update(id, updateArticleDto);
   }
 
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id', new ParseUUIDPipe()) id: string) {
-    return this.articlesService.delete(id);
+  async remove(@Param('id', new ParseUUIDPipe()) id: string) {
+    return await this.articlesService.delete(id);
   }
 }

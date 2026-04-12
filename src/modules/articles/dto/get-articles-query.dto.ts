@@ -1,8 +1,10 @@
 import { IsUUID, IsOptional, IsEnum, IsString, IsIn } from 'class-validator';
 
+import { Status } from '../../../../generated/prisma/enums';
+
 import { SortOrder } from 'src/types';
 
-import { Article, Status } from '../entities/article.entity';
+import { Article } from '../entities/article.entity';
 
 const sortableFields: Array<keyof Article> = [
   'id',

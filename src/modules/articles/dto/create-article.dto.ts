@@ -8,7 +8,7 @@ import {
   MinLength,
 } from 'class-validator';
 
-import { Status } from '../entities/article.entity';
+import { Status } from '../../../../generated/prisma/enums';
 
 export class CreateArticleDto {
   @IsString()
