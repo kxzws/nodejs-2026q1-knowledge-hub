@@ -1,6 +1,5 @@
 import { randomUUID } from 'node:crypto';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 
 import { Category } from './entities/category.entity';
 
@@ -14,8 +13,6 @@ import { getSortCb } from 'src/utils/sort';
 @Injectable()
 export class CategoriesService {
   private categories = new Map<string, Category>();
-
-  constructor(private eventEmitter: EventEmitter2) {}
 
   getAll(query: GetCategoriesQueryDto) {
     const order = query.order ?? SortOrder.ASC;
@@ -68,8 +65,6 @@ export class CategoriesService {
 
   delete(id: string) {
     this.getById(id);
-
-    this.eventEmitter.emit('category.deleted', { categoryId: id });
 
     this.categories.delete(id);
 

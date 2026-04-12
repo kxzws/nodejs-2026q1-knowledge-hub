@@ -5,7 +5,6 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 
 import { Role, User } from './entities/user.entity';
 
@@ -22,8 +21,6 @@ import { getSortCb } from 'src/utils/sort';
 @Injectable()
 export class UsersService {
   private users = new Map<string, User>();
-
-  constructor(private eventEmitter: EventEmitter2) {}
 
   getAll(query: GetUsersQueryDto) {
     const order = query.order ?? SortOrder.DESC;
@@ -102,8 +99,6 @@ export class UsersService {
 
   delete(id: string) {
     this.getById(id);
-
-    this.eventEmitter.emit('user.deleted', { authorId: id });
 
     this.users.delete(id);
 

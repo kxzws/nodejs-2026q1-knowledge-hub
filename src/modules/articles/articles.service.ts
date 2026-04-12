@@ -4,7 +4,6 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 
 import { Article, Status } from './entities/article.entity';
 
@@ -23,7 +22,6 @@ export class ArticlesService {
   private articles = new Map<string, Article>();
 
   constructor(
-    private eventEmitter: EventEmitter2,
     private readonly categorisService: CategoriesService,
     private readonly usersService: UsersService,
   ) {}
@@ -115,38 +113,8 @@ export class ArticlesService {
   delete(id: string) {
     this.getById(id);
 
-    this.eventEmitter.emit('article.deleted', { articleId: id });
-
     this.articles.delete(id);
 
     return;
-  }
-
-  @OnEvent('user.deleted')
-  handleAuthorDeleted(payload: { authorId: string }) {
-    const { authorId } = payload;
-
-    const articlesWithAuthor = this.getAll({}).filter(
-      (article) => article.authorId === authorId,
-    );
-
-    if (articlesWithAuthor.length) {
-      articlesWithAuthor.forEach(({ id }) => {
-        this.update(id, { authorId: null });
-      });
-    }
-  }
-
-  @OnEvent('category.deleted')
-  handleCategoryDeleted(payload: { categoryId: string }) {
-    const { categoryId } = payload;
-
-    const articlesWithCategory = this.getAll({ categoryId });
-
-    if (articlesWithCategory.length) {
-      articlesWithCategory.forEach(({ id }) => {
-        this.update(id, { categoryId: null });
-      });
-    }
   }
 }

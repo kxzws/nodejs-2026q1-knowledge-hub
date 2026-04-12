@@ -4,7 +4,6 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { OnEvent } from '@nestjs/event-emitter';
 
 import { Comment } from './entities/comment.entity';
 
@@ -106,33 +105,5 @@ export class CommentsService {
     this.comments.delete(id);
 
     return;
-  }
-
-  @OnEvent('user.deleted')
-  handleAuthorDeleted(payload: { authorId: string }) {
-    const { authorId } = payload;
-
-    const commentsWithAuthor = this.getAll().filter(
-      (comment) => comment.authorId === authorId,
-    );
-
-    if (commentsWithAuthor.length) {
-      commentsWithAuthor.forEach(({ id }) => {
-        this.delete(id);
-      });
-    }
-  }
-
-  @OnEvent('article.deleted')
-  handleArticleDeleted(payload: { articleId: string }) {
-    const { articleId } = payload;
-
-    const articleComments = this.getAllByArticleId({ articleId });
-
-    if (articleComments.length) {
-      articleComments.forEach(({ id }) => {
-        this.delete(id);
-      });
-    }
   }
 }
