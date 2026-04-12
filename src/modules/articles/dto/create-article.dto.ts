@@ -9,6 +9,7 @@ import {
 } from 'class-validator';
 
 import { Status } from '../../../../generated/prisma/enums';
+import { Transform } from 'class-transformer';
 
 export class CreateArticleDto {
   @IsString()
@@ -21,6 +22,7 @@ export class CreateArticleDto {
   @MinLength(8)
   content: string;
 
+  @Transform(({ value }) => value?.toUpperCase())
   @IsEnum(Status)
   @IsOptional()
   status?: Status; // defaults to 'draft'

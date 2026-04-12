@@ -5,6 +5,7 @@ import { Status } from '../../../../generated/prisma/enums';
 import { SortOrder } from 'src/types';
 
 import { Article } from '../entities/article.entity';
+import { Transform } from 'class-transformer';
 
 const sortableFields: Array<keyof Article> = [
   'id',
@@ -18,6 +19,7 @@ const sortableFields: Array<keyof Article> = [
 ];
 
 export class GetArticlesQueryDto {
+  @Transform(({ value }) => value?.toUpperCase())
   @IsEnum(Status)
   @IsOptional()
   status?: Status;
