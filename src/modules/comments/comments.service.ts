@@ -1,8 +1,13 @@
 import {
+  ForbiddenException,
   Injectable,
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
+
+import { Role } from 'generated/prisma/enums';
+
+import { ResponseUser } from 'src/common/types/auth.types';
 
 import { GetCommentsQueryDto } from './dto/get-comments-query.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
@@ -52,10 +57,10 @@ export class CommentsService {
     });
   }
 
-  async getById(id: string) {
+  async getById(id: string, include: boolean = true) {
     const comment = await this.prisma.comment.findUnique({
       where: { id },
-      include: { author: true, article: true },
+      include: { author: include, article: include },
     });
 
     if (!comment)
@@ -88,8 +93,15 @@ export class CommentsService {
     });
   }
 
-  async delete(id: string) {
-    await this.getById(id);
+  async delete(id: string, currentUser: ResponseUser) {
+    const comment = await this.getById(id, false);
+
+    if (
+      currentUser.role !== Role.ADMIN &&
+      comment.authorId !== currentUser.userId
+    ) {
+      throw new ForbiddenException('You can only delete your own comments');
+    }
 
     await this.prisma.comment.delete({ where: { id } });
 

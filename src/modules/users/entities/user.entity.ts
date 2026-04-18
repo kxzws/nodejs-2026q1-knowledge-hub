@@ -1,6 +1,6 @@
 import { OmitType } from '@nestjs/swagger';
 
-import { Role } from '../../../../generated/prisma/enums';
+import { Role } from 'generated/prisma/enums';
 
 export interface User {
   id: string; // uuid v4

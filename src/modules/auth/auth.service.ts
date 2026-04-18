@@ -2,7 +2,7 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 
-import { Role } from '../../../generated/prisma/enums';
+import { Role } from 'generated/prisma/enums';
 
 import { UsersService } from '../users/users.service';
 

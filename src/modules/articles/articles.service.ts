@@ -1,8 +1,13 @@
 import {
+  ForbiddenException,
   Injectable,
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
+
+import { Role } from 'generated/prisma/enums';
+
+import { ResponseUser } from 'src/common/types/auth.types';
 
 import { GetArticlesQueryDto } from './dto/get-articles-query.dto';
 import { CreateArticleDto } from './dto/create-article.dto';
@@ -47,10 +52,15 @@ export class ArticlesService {
     });
   }
 
-  async getById(id: string) {
+  async getById(id: string, include: boolean = true) {
     const article = await this.prisma.article.findUnique({
       where: { id },
-      include: { author: true, category: true, comments: true, tags: true },
+      include: {
+        author: include,
+        category: include,
+        comments: include,
+        tags: include,
+      },
     });
 
     if (!article)
@@ -99,7 +109,16 @@ export class ArticlesService {
     });
   }
 
-  async update(id: string, dto: UpdateArticleDto) {
+  async update(id: string, dto: UpdateArticleDto, currentUser: ResponseUser) {
+    const article = await this.getById(id, false);
+
+    if (
+      currentUser.role !== Role.ADMIN &&
+      article.authorId !== currentUser.userId
+    ) {
+      throw new ForbiddenException('You can only update your own articles');
+    }
+
     const { tags } = dto;
 
     return await this.prisma.article.update({
@@ -120,8 +139,15 @@ export class ArticlesService {
     });
   }
 
-  async delete(id: string) {
-    await this.getById(id);
+  async delete(id: string, currentUser: ResponseUser) {
+    const article = await this.getById(id, false);
+
+    if (
+      currentUser.role !== Role.ADMIN &&
+      article.authorId !== currentUser.userId
+    ) {
+      throw new ForbiddenException('You can only delete your own articles');
+    }
 
     await this.prisma.article.delete({ where: { id } });
 
