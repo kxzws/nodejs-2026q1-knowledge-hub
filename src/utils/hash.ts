@@ -1,6 +1,6 @@
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 
-const saltRounds = process.env.CRYPT_SALT;
+const saltRounds = process.env.CRYPT_SALT && Number(process.env.CRYPT_SALT);
 
 export const getHash = async (value: string): Promise<string> => {
   return await bcrypt.hash(value, saltRounds);

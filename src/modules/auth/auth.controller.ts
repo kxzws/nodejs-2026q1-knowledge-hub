@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, HttpCode } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 
@@ -18,25 +18,27 @@ import { SwaggerTokens } from './entities/auth.entity';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @ApiResponse({ status: 201, type: OmittedSwaggerUser })
   @Public()
   @Throttle({ auth: { limit: 10, ttl: 60000 } })
   @Post('signup')
-  @ApiResponse({ status: 201, type: OmittedSwaggerUser })
   async signup(@Body() signupUserDto: AuthenticationUserDto) {
     return await this.authService.signup(signupUserDto);
   }
 
+  @ApiResponse({ status: 200, type: SwaggerTokens })
   @Public()
   @Throttle({ auth: { limit: 10, ttl: 60000 } })
   @Post('login')
-  @ApiResponse({ status: 200, type: SwaggerTokens })
+  @HttpCode(200)
   async login(@Body() signupUserDto: AuthenticationUserDto) {
     return await this.authService.login(signupUserDto);
   }
 
+  @ApiResponse({ status: 200, type: SwaggerTokens })
   @Public()
   @Post('refresh')
-  @ApiResponse({ status: 200, type: SwaggerTokens })
+  @HttpCode(200)
   async refresh(@Body() refreshDto: RefreshDto) {
     return await this.authService.refresh(refreshDto);
   }

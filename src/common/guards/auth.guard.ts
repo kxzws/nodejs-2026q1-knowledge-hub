@@ -31,7 +31,11 @@ export class AuthGuard implements CanActivate {
 
     const token = this.extractTokenFromHeader(request);
 
-    if (!token) throw new UnauthorizedException('Authorization failed');
+    if (!token) {
+      throw new UnauthorizedException(
+        'Authorization failed: no token or invalid header',
+      );
+    }
 
     try {
       const payload = await this.jwtService.verifyAsync(token, {
@@ -40,7 +44,9 @@ export class AuthGuard implements CanActivate {
 
       request['user'] = payload;
     } catch {
-      throw new UnauthorizedException('Authorization failed');
+      throw new UnauthorizedException(
+        'Authorization failed: invalid or expired token',
+      );
     }
 
     return true;

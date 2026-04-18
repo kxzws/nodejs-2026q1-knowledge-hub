@@ -34,8 +34,10 @@ export class RolesGuard implements CanActivate {
       case Role.EDITOR: {
         const className = context.getClass().name;
 
-        if (className.includes('Categories')) {
-          throw new ForbiddenException('Editors cannot manage categories');
+        if (className.includes('Categories') || className.includes('Users')) {
+          throw new ForbiddenException(
+            'Editors cannot manage categories and users',
+          );
         }
 
         if (method === 'POST') return true;
