@@ -1,5 +1,6 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 
 import { Public } from 'src/common/decorators/public.decorator';
 
@@ -13,10 +14,12 @@ import { SwaggerTokens } from './entities/auth.entity';
 
 @ApiTags('Auth')
 @Controller('auth')
+@UseGuards(ThrottlerGuard)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Public()
+  @Throttle({ auth: { limit: 10, ttl: 60000 } })
   @Post('signup')
   @ApiResponse({ status: 201, type: OmittedSwaggerUser })
   async signup(@Body() signupUserDto: AuthenticationUserDto) {
@@ -24,6 +27,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ auth: { limit: 10, ttl: 60000 } })
   @Post('login')
   @ApiResponse({ status: 200, type: SwaggerTokens })
   async login(@Body() signupUserDto: AuthenticationUserDto) {
