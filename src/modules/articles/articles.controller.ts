@@ -10,7 +10,7 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { ArticlesService } from './articles.service';
 
@@ -25,24 +25,28 @@ import { UpdateArticleDto } from './dto/update-article.dto';
 export class ArticlesController {
   constructor(private readonly articlesService: ArticlesService) {}
 
+  @ApiBearerAuth('JWT-auth')
   @Get()
   @ApiResponse({ status: 200, type: [SwaggerArticle] })
   async getAll(@Query() query: GetArticlesQueryDto) {
     return await this.articlesService.getAll(query);
   }
 
+  @ApiBearerAuth('JWT-auth')
   @Get(':id')
   @ApiResponse({ status: 200, type: SwaggerArticle })
   async getById(@Param('id', new ParseUUIDPipe()) id: string) {
     return await this.articlesService.getById(id);
   }
 
+  @ApiBearerAuth('JWT-auth')
   @Post()
   @ApiResponse({ status: 201, type: SwaggerArticle })
   async create(@Body() createArticleDto: CreateArticleDto) {
     return await this.articlesService.create(createArticleDto);
   }
 
+  @ApiBearerAuth('JWT-auth')
   @Put(':id')
   @ApiResponse({ status: 200, type: SwaggerArticle })
   async update(
@@ -52,6 +56,7 @@ export class ArticlesController {
     return await this.articlesService.update(id, updateArticleDto);
   }
 
+  @ApiBearerAuth('JWT-auth')
   @Delete(':id')
   @HttpCode(204)
   async remove(@Param('id', new ParseUUIDPipe()) id: string) {
