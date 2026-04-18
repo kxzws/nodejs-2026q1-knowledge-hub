@@ -18,6 +18,8 @@ async function bootstrap() {
 
   const { httpAdapter } = app.get(HttpAdapterHost);
 
+  app.getHttpAdapter().getInstance().set('trust proxy', 1);
+
   app.useGlobalInterceptors(new LoggingInterceptor());
   app.useGlobalPipes(
     new ValidationPipe({
