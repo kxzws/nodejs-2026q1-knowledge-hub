@@ -14,7 +14,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 
 import { SortOrder } from 'src/types';
 
-import { getHash } from 'src/utils/hash';
+import { getHash, compareHash } from 'src/utils/hash';
 
 @Injectable()
 export class UsersService {
@@ -55,6 +55,12 @@ export class UsersService {
     return user;
   }
 
+  async getByLogin(login: string) {
+    return await this.prisma.user.findUnique({
+      where: { login },
+    });
+  }
+
   async exists(id: string) {
     if (!id) return false;
 
@@ -71,7 +77,7 @@ export class UsersService {
     return await this.prisma.user.create({
       data: {
         ...dto,
-        password: getHash(password),
+        password: await getHash(password),
       },
       omit: {
         password: true,
@@ -88,11 +94,11 @@ export class UsersService {
 
     if (!user) throw new NotFoundException(`User with ID ${id} not found`);
 
-    if (user.password === getHash(oldPassword)) {
+    if (await compareHash(oldPassword, user.password)) {
       return await this.prisma.user.update({
         where: { id },
         data: {
-          password: getHash(newPassword),
+          password: await getHash(newPassword),
         },
         omit: {
           password: true,
