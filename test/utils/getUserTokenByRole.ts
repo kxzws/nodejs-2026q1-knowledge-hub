@@ -1,6 +1,8 @@
 import { authRoutes } from '../endpoints';
 import promoteUserRole from './promoteUserRole';
 
+import { Role } from '../../generated/prisma/enums';
+
 const getUserTokenByRole = async (
   request,
   role: 'admin' | 'editor' | 'viewer',
@@ -24,7 +26,7 @@ const getUserTokenByRole = async (
   }
 
   if (role !== 'viewer') {
-    await promoteUserRole(userId, role);
+    await promoteUserRole(userId, role?.toUpperCase() as Role);
   }
 
   // Login AFTER promotion so JWT payload carries the correct role

@@ -7,7 +7,6 @@ import { Public } from 'src/common/decorators/public.decorator';
 import { AuthService } from './auth.service';
 
 import { AuthenticationUserDto } from './dto/authentication-user.dto';
-import { RefreshDto } from './dto/refresh.dto';
 
 import { OmittedSwaggerUser } from '../users/entities/user.entity';
 import { SwaggerTokens } from './entities/auth.entity';
@@ -39,7 +38,7 @@ export class AuthController {
   @Public()
   @Post('refresh')
   @HttpCode(200)
-  async refresh(@Body() refreshDto: RefreshDto) {
+  async refresh(@Body() refreshDto) {
     return await this.authService.refresh(refreshDto);
   }
 }

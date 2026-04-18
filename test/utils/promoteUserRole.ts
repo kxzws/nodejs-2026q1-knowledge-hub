@@ -1,6 +1,6 @@
 import prisma from '../lib/prisma';
 
-type Role = 'viewer' | 'editor' | 'admin';
+import { Role } from '../../generated/prisma/enums';
 
 const promoteUserRole = async (userId: string, role: Role): Promise<void> => {
   await prisma.user.update({
