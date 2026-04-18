@@ -1,9 +1,14 @@
-import { createHash } from 'node:crypto';
+import bcrypt from 'bcrypt';
 
-export const getHash = (value: string): string => {
-  const hash = createHash('sha256');
+const saltRounds = process.env.CRYPT_SALT;
 
-  hash.update(value);
+export const getHash = async (value: string): Promise<string> => {
+  return await bcrypt.hash(value, saltRounds);
+};
 
-  return hash.digest('hex');
+export const compareHash = async (
+  data: string,
+  encryptedData: string,
+): Promise<boolean> => {
+  return await bcrypt.compare(data, encryptedData);
 };
