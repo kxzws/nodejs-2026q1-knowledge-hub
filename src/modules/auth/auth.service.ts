@@ -1,4 +1,9 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 
@@ -37,8 +42,15 @@ export class AuthService {
     return await this.generateTokens(user.id, user.login, user.role);
   }
 
-  async refresh(dto: RefreshDto) {
-    const { refreshToken } = dto;
+  async refresh(dto: RefreshDto | undefined) {
+    const { refreshToken } = dto ?? {};
+
+    if (!refreshToken) {
+      throw new HttpException(
+        'refreshToken should not be empty',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
 
     try {
       const payload = await this.jwtService.verifyAsync<{

@@ -1,6 +1,8 @@
 import { authRoutes } from '../endpoints';
 import promoteUserRole from './promoteUserRole';
 
+import { Role } from '../../generated/prisma/enums';
+
 const createUserDto = {
   login: 'TEST_AUTH_LOGIN',
   password: 'Tu6!@#%&',
@@ -20,7 +22,7 @@ const getTokenAndUserId = async (request) => {
   }
 
   // promote directly in DB so base tests run as admin and can mutate
-  await promoteUserRole(mockUserId, 'admin');
+  await promoteUserRole(mockUserId, Role.ADMIN);
 
   // get token after promotion so the JWT payload role === 'admin'
   const {
