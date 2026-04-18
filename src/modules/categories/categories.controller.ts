@@ -12,6 +12,10 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+import { Roles } from 'src/common/decorators/roles.decorator';
+
+import { Role } from 'generated/prisma/enums';
+
 import { CategoriesService } from './categories.service';
 
 import { SwaggerCategory } from './entities/category.entity';
@@ -26,29 +30,31 @@ export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @ApiBearerAuth('JWT-auth')
-  @Get()
   @ApiResponse({ status: 200, type: [SwaggerCategory] })
+  @Get()
   async getAll(@Query() query: GetCategoriesQueryDto) {
     return await this.categoriesService.getAll(query);
   }
 
   @ApiBearerAuth('JWT-auth')
-  @Get(':id')
   @ApiResponse({ status: 200, type: SwaggerCategory })
+  @Get(':id')
   async getById(@Param('id', new ParseUUIDPipe()) id: string) {
     return await this.categoriesService.getById(id);
   }
 
   @ApiBearerAuth('JWT-auth')
-  @Post()
   @ApiResponse({ status: 201, type: SwaggerCategory })
+  @Roles(Role.ADMIN)
+  @Post()
   async create(@Body() createCategoryDto: CreateCategoryDto) {
     return await this.categoriesService.create(createCategoryDto);
   }
 
   @ApiBearerAuth('JWT-auth')
-  @Put(':id')
   @ApiResponse({ status: 200, type: SwaggerCategory })
+  @Roles(Role.ADMIN)
+  @Put(':id')
   async update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
@@ -57,6 +63,7 @@ export class CategoriesController {
   }
 
   @ApiBearerAuth('JWT-auth')
+  @Roles(Role.ADMIN)
   @Delete(':id')
   @HttpCode(204)
   async remove(@Param('id', new ParseUUIDPipe()) id: string) {

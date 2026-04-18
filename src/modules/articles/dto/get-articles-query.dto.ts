@@ -1,6 +1,6 @@
 import { IsUUID, IsOptional, IsEnum, IsString, IsIn } from 'class-validator';
 
-import { Status } from '../../../../generated/prisma/enums';
+import { Status } from 'generated/prisma/enums';
 
 import { SortOrder } from 'src/types';
 
