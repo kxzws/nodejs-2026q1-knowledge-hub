@@ -10,7 +10,7 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { CategoriesService } from './categories.service';
 
@@ -25,24 +25,28 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
+  @ApiBearerAuth('JWT-auth')
   @Get()
   @ApiResponse({ status: 200, type: [SwaggerCategory] })
   async getAll(@Query() query: GetCategoriesQueryDto) {
     return await this.categoriesService.getAll(query);
   }
 
+  @ApiBearerAuth('JWT-auth')
   @Get(':id')
   @ApiResponse({ status: 200, type: SwaggerCategory })
   async getById(@Param('id', new ParseUUIDPipe()) id: string) {
     return await this.categoriesService.getById(id);
   }
 
+  @ApiBearerAuth('JWT-auth')
   @Post()
   @ApiResponse({ status: 201, type: SwaggerCategory })
   async create(@Body() createCategoryDto: CreateCategoryDto) {
     return await this.categoriesService.create(createCategoryDto);
   }
 
+  @ApiBearerAuth('JWT-auth')
   @Put(':id')
   @ApiResponse({ status: 200, type: SwaggerCategory })
   async update(
@@ -52,6 +56,7 @@ export class CategoriesController {
     return await this.categoriesService.update(id, updateCategoryDto);
   }
 
+  @ApiBearerAuth('JWT-auth')
   @Delete(':id')
   @HttpCode(204)
   async remove(@Param('id', new ParseUUIDPipe()) id: string) {
