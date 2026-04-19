@@ -1,18 +1,14 @@
 import { OmitType } from '@nestjs/swagger';
 
-export enum Role {
-  ADMIN = 'admin',
-  EDITOR = 'editor',
-  VIEWER = 'viewer',
-}
+import { Role } from '../../../../generated/prisma/enums';
 
 export interface User {
   id: string; // uuid v4
   login: string;
   password: string;
   role: Role;
-  createdAt: number; // timestamp of creation
-  updatedAt: number; // timestamp of last update
+  createdAt: string; // timestamp of creation
+  updatedAt: string; // timestamp of last update
 }
 
 export class SwaggerUser implements User {
@@ -20,8 +16,8 @@ export class SwaggerUser implements User {
   login: string;
   password: string;
   role: Role;
-  createdAt: number;
-  updatedAt: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export class OmittedSwaggerUser extends OmitType(SwaggerUser, ['password']) {}

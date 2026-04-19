@@ -1,35 +1,33 @@
-import { randomUUID } from 'node:crypto';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-
-import { Category } from './entities/category.entity';
 
 import { GetCategoriesQueryDto } from './dto/get-categories.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 
+import { PrismaService } from 'src/prisma/prisma.service';
+
 import { SortOrder } from 'src/types';
-import { getSortCb } from 'src/utils/sort';
 
 @Injectable()
 export class CategoriesService {
-  private categories = new Map<string, Category>();
+  constructor(private readonly prisma: PrismaService) {}
 
-  constructor(private eventEmitter: EventEmitter2) {}
-
-  getAll(query: GetCategoriesQueryDto) {
+  async getAll(query: GetCategoriesQueryDto) {
     const order = query.order ?? SortOrder.ASC;
     const sortBy = query.sortBy ?? 'name';
 
-    const sortedCategories = Array.from(this.categories.values()).sort(
-      getSortCb<Category>({ order, sortBy }),
-    );
-
-    return sortedCategories;
+    return await this.prisma.category.findMany({
+      orderBy: {
+        [sortBy]: order,
+      },
+    });
   }
 
-  getById(id: string) {
-    const category = this.categories.get(id);
+  async getById(id: string) {
+    const category = await this.prisma.category.findUnique({
+      where: { id },
+      include: { articles: true },
+    });
 
     if (!category)
       throw new NotFoundException(`Category with ID ${id} not found`);
@@ -37,41 +35,30 @@ export class CategoriesService {
     return category;
   }
 
-  exists(id: string) {
-    return this.categories.has(id);
+  async exists(id: string) {
+    if (!id) return false;
+
+    const category = await this.prisma.category.findUnique({ where: { id } });
+
+    return !!category;
   }
 
-  create(dto: CreateCategoryDto) {
-    const { name, description } = dto;
-
-    const newCategory = {
-      id: randomUUID(),
-      name,
-      description,
-    };
-
-    this.categories.set(newCategory.id, newCategory);
-
-    return newCategory;
+  async create(dto: CreateCategoryDto) {
+    return await this.prisma.category.create({ data: dto });
   }
 
-  update(id: string, dto: UpdateCategoryDto) {
-    const category = this.getById(id);
-
-    this.categories.set(category.id, {
-      ...category,
-      ...dto,
+  async update(id: string, dto: UpdateCategoryDto) {
+    return await this.prisma.category.update({
+      where: { id },
+      data: dto,
+      include: { articles: true },
     });
-
-    return this.categories.get(category.id);
   }
 
-  delete(id: string) {
-    this.getById(id);
+  async delete(id: string) {
+    await this.getById(id);
 
-    this.eventEmitter.emit('category.deleted', { categoryId: id });
-
-    this.categories.delete(id);
+    await this.prisma.category.delete({ where: { id } });
 
     return;
   }

@@ -6,7 +6,8 @@ import {
   MinLength,
 } from 'class-validator';
 
-import { Role } from '../entities/user.entity';
+import { Role } from '../../../../generated/prisma/enums';
+import { Transform } from 'class-transformer';
 
 export class CreateUserDto {
   @IsString()
@@ -18,6 +19,7 @@ export class CreateUserDto {
   @MinLength(8)
   password: string;
 
+  @Transform(({ value }) => value?.toUpperCase())
   @IsEnum(Role)
   @IsOptional()
   role?: Role; // defaults to 'viewer'

@@ -1,42 +1,39 @@
-import { randomUUID } from 'node:crypto';
 import {
   Injectable,
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { OnEvent } from '@nestjs/event-emitter';
-
-import { Comment } from './entities/comment.entity';
 
 import { GetCommentsQueryDto } from './dto/get-comments-query.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
 
+import { PrismaService } from '../../prisma/prisma.service';
 import { ArticlesService } from '../articles/articles.service';
 import { UsersService } from '../users/users.service';
 
 import { SortOrder } from 'src/types';
-import { getSortCb } from 'src/utils/sort';
 
 @Injectable()
 export class CommentsService {
-  private comments = new Map<string, Comment>();
-
   constructor(
+    private readonly prisma: PrismaService,
     private readonly articlesService: ArticlesService,
     private readonly usersService: UsersService,
   ) {}
 
-  getAll() {
-    return Array.from(this.comments.values());
+  async getAll() {
+    return await this.prisma.comment.findMany({
+      // include: { author: true, article: true },
+    });
   }
 
-  getAllByArticleId(query: GetCommentsQueryDto) {
+  async getAllByArticleId(query: GetCommentsQueryDto) {
     const { articleId } = query;
 
     const order = query.order ?? SortOrder.DESC;
     const sortBy = query.sortBy ?? 'createdAt';
 
-    const articleExists = this.articlesService.exists(articleId);
+    const articleExists = await this.articlesService.exists(articleId);
 
     if (!articleExists) {
       throw new UnprocessableEntityException(
@@ -44,19 +41,22 @@ export class CommentsService {
       );
     }
 
-    const filteredComments = this.getAll().filter(
-      (comment) => comment.articleId === articleId,
-    );
-
-    const sortedComments = [...filteredComments].sort(
-      getSortCb<Comment>({ order, sortBy }),
-    );
-
-    return sortedComments;
+    return await this.prisma.comment.findMany({
+      where: {
+        articleId,
+      },
+      orderBy: {
+        [sortBy]: order,
+      },
+      // include: { author: true, article: true },
+    });
   }
 
-  getById(id: string) {
-    const comment = this.comments.get(id);
+  async getById(id: string) {
+    const comment = await this.prisma.comment.findUnique({
+      where: { id },
+      include: { author: true, article: true },
+    });
 
     if (!comment)
       throw new NotFoundException(`Comment with ID ${id} not found`);
@@ -64,8 +64,8 @@ export class CommentsService {
     return comment;
   }
 
-  create(dto: CreateCommentDto) {
-    const { content, articleId, authorId } = dto;
+  async create(dto: CreateCommentDto) {
+    const { articleId, authorId } = dto;
 
     const articleExists = this.articlesService.exists(articleId);
     const userExists = this.usersService.exists(authorId);
@@ -82,57 +82,17 @@ export class CommentsService {
       );
     }
 
-    const timestamp = Date.now();
-
-    const newComment = {
-      id: randomUUID(),
-      content,
-      articleId,
-      authorId: authorId ?? null,
-      createdAt: timestamp,
-    };
-
-    this.comments.set(newComment.id, newComment);
-
-    return newComment;
+    return await this.prisma.comment.create({
+      data: dto,
+      // include: { author: true, article: true },
+    });
   }
 
-  delete(id: string) {
-    const comment = this.comments.get(id);
+  async delete(id: string) {
+    await this.getById(id);
 
-    if (!comment)
-      throw new NotFoundException(`Comment with ID ${id} not found`);
-
-    this.comments.delete(id);
+    await this.prisma.comment.delete({ where: { id } });
 
     return;
-  }
-
-  @OnEvent('user.deleted')
-  handleAuthorDeleted(payload: { authorId: string }) {
-    const { authorId } = payload;
-
-    const commentsWithAuthor = this.getAll().filter(
-      (comment) => comment.authorId === authorId,
-    );
-
-    if (commentsWithAuthor.length) {
-      commentsWithAuthor.forEach(({ id }) => {
-        this.delete(id);
-      });
-    }
-  }
-
-  @OnEvent('article.deleted')
-  handleArticleDeleted(payload: { articleId: string }) {
-    const { articleId } = payload;
-
-    const articleComments = this.getAllByArticleId({ articleId });
-
-    if (articleComments.length) {
-      articleComments.forEach(({ id }) => {
-        this.delete(id);
-      });
-    }
   }
 }

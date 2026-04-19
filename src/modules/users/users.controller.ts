@@ -27,34 +27,34 @@ export class UsersController {
 
   @Get()
   @ApiResponse({ status: 200, type: [OmittedSwaggerUser] })
-  getAll(@Query() query: GetUsersQueryDto) {
-    return this.usersService.getAll(query);
+  async getAll(@Query() query: GetUsersQueryDto) {
+    return await this.usersService.getAll(query);
   }
 
   @Get(':id')
   @ApiResponse({ status: 200, type: OmittedSwaggerUser })
-  getById(@Param('id', new ParseUUIDPipe()) id: string) {
-    return this.usersService.getById(id);
+  async getById(@Param('id', new ParseUUIDPipe()) id: string) {
+    return await this.usersService.getById(id);
   }
 
   @Post()
   @ApiResponse({ status: 201, type: OmittedSwaggerUser })
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  async create(@Body() createUserDto: CreateUserDto) {
+    return await this.usersService.create(createUserDto);
   }
 
   @Put(':id')
   @ApiResponse({ status: 200, type: OmittedSwaggerUser })
-  updatePassword(
+  async updatePassword(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() updatePasswordDto: UpdatePasswordDto,
   ) {
-    return this.usersService.updatePassword(id, updatePasswordDto);
+    return await this.usersService.updatePassword(id, updatePasswordDto);
   }
 
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id', new ParseUUIDPipe()) id: string) {
-    return this.usersService.delete(id);
+  async remove(@Param('id', new ParseUUIDPipe()) id: string) {
+    return await this.usersService.delete(id);
   }
 }
