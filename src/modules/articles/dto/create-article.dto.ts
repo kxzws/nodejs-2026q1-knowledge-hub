@@ -8,7 +8,7 @@ import {
   MinLength,
 } from 'class-validator';
 
-import { Status } from '../../../../generated/prisma/enums';
+import { Status } from 'generated/prisma/enums';
 import { Transform } from 'class-transformer';
 
 export class CreateArticleDto {

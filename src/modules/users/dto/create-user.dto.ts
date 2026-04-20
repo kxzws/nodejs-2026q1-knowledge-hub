@@ -6,7 +6,7 @@ import {
   MinLength,
 } from 'class-validator';
 
-import { Role } from '../../../../generated/prisma/enums';
+import { Role } from 'generated/prisma/enums';
 import { Transform } from 'class-transformer';
 
 export class CreateUserDto {

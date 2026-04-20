@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import { PrismaPg } from '@prisma/adapter-pg';
+import * as bcrypt from 'bcrypt';
 
 import { PrismaClient } from '../generated/prisma/client';
 import { Role, Status } from '../generated/prisma/enums';
@@ -8,18 +9,20 @@ const connectionString = `${process.env.DATABASE_URL}`;
 const adapter = new PrismaPg({ connectionString });
 const prisma = new PrismaClient({ adapter });
 
+const saltRounds = process.env.CRYPT_SALT && Number(process.env.CRYPT_SALT);
+
 async function main() {
   const admin = await prisma.user.create({
     data: {
       login: 'admin',
-      password: '11223344',
+      password: await bcrypt.hash('11223344', saltRounds),
       role: Role.ADMIN,
     },
   });
   const editor = await prisma.user.create({
     data: {
       login: 'user',
-      password: '11223344',
+      password: await bcrypt.hash('11223344', saltRounds),
       role: Role.EDITOR,
     },
   });

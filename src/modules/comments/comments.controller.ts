@@ -8,8 +8,14 @@ import {
   Delete,
   HttpCode,
   Query,
+  Req,
 } from '@nestjs/common';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
+
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { RequestWithUser } from 'src/common/types/auth.types';
+
+import { Role } from 'generated/prisma/enums';
 
 import { CommentsService } from './comments.service';
 
@@ -23,27 +29,36 @@ import { GetCommentsQueryDto } from './dto/get-comments-query.dto';
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
-  @Get()
+  @ApiBearerAuth('JWT-auth')
   @ApiResponse({ status: 200, type: [SwaggerComment] })
+  @Get()
   async getAllByArticleId(@Query() query: GetCommentsQueryDto) {
     return await this.commentsService.getAllByArticleId(query);
   }
 
-  @Get(':id')
+  @ApiBearerAuth('JWT-auth')
   @ApiResponse({ status: 200, type: SwaggerComment })
+  @Get(':id')
   async getById(@Param('id', new ParseUUIDPipe()) id: string) {
     return await this.commentsService.getById(id);
   }
 
-  @Post()
+  @ApiBearerAuth('JWT-auth')
   @ApiResponse({ status: 201, type: SwaggerComment })
+  @Roles(Role.ADMIN, Role.EDITOR)
+  @Post()
   async create(@Body() createCommentDto: CreateCommentDto) {
     return await this.commentsService.create(createCommentDto);
   }
 
+  @ApiBearerAuth('JWT-auth')
+  @Roles(Role.ADMIN, Role.EDITOR)
   @Delete(':id')
   @HttpCode(204)
-  async remove(@Param('id', new ParseUUIDPipe()) id: string) {
-    return await this.commentsService.delete(id);
+  async remove(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Req() req: RequestWithUser,
+  ) {
+    return await this.commentsService.delete(id, req.user);
   }
 }

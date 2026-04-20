@@ -18,6 +18,8 @@ async function bootstrap() {
 
   const { httpAdapter } = app.get(HttpAdapterHost);
 
+  app.getHttpAdapter().getInstance().set('trust proxy', 1);
+
   app.useGlobalInterceptors(new LoggingInterceptor());
   app.useGlobalPipes(
     new ValidationPipe({
@@ -32,6 +34,17 @@ async function bootstrap() {
     .setTitle('Knowledge Hub API')
     .setDescription('The Knowledge Hub platform API description')
     .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Enter JWT token',
+        in: 'header',
+      },
+      'JWT-auth',
+    )
     .addTag('Users')
     .addTag('Articles')
     .addTag('Categories')

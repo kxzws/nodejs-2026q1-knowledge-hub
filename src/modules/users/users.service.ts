@@ -4,7 +4,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-import { Status } from '../../../generated/prisma/enums';
+import { Role, Status } from 'generated/prisma/enums';
+
+import { ResponseUser } from 'src/common/types/auth.types';
 
 import { GetUsersQueryDto } from './dto/get-users.query.dto';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -14,7 +16,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 
 import { SortOrder } from 'src/types';
 
-import { getHash } from 'src/utils/hash';
+import { getHash, compareHash } from 'src/utils/hash';
 
 @Injectable()
 export class UsersService {
@@ -38,21 +40,27 @@ export class UsersService {
     });
   }
 
-  async getById(id: string) {
+  async getById(id: string, include: boolean = true) {
     const user = await this.prisma.user.findUnique({
       where: { id },
       omit: {
         password: true,
       },
       include: {
-        articles: true,
-        comments: true,
+        articles: include,
+        comments: include,
       },
     });
 
     if (!user) throw new NotFoundException(`User with ID ${id} not found`);
 
     return user;
+  }
+
+  async getByLogin(login: string) {
+    return await this.prisma.user.findUnique({
+      where: { login },
+    });
   }
 
   async exists(id: string) {
@@ -71,7 +79,7 @@ export class UsersService {
     return await this.prisma.user.create({
       data: {
         ...dto,
-        password: getHash(password),
+        password: await getHash(password),
       },
       omit: {
         password: true,
@@ -79,7 +87,17 @@ export class UsersService {
     });
   }
 
-  async updatePassword(id: string, dto: UpdatePasswordDto) {
+  async updatePassword(
+    id: string,
+    dto: UpdatePasswordDto,
+    currentUser: ResponseUser,
+  ) {
+    if (currentUser.role !== Role.ADMIN && id !== currentUser.userId) {
+      throw new ForbiddenException(
+        'You can only update your own user password',
+      );
+    }
+
     const { oldPassword, newPassword } = dto;
 
     const user = await this.prisma.user.findUnique({
@@ -88,11 +106,11 @@ export class UsersService {
 
     if (!user) throw new NotFoundException(`User with ID ${id} not found`);
 
-    if (user.password === getHash(oldPassword)) {
+    if (await compareHash(oldPassword, user.password)) {
       return await this.prisma.user.update({
         where: { id },
         data: {
-          password: getHash(newPassword),
+          password: await getHash(newPassword),
         },
         omit: {
           password: true,
@@ -107,8 +125,12 @@ export class UsersService {
     throw new ForbiddenException('Old password does not match');
   }
 
-  async delete(id: string) {
-    await this.getById(id);
+  async delete(id: string, currentUser: ResponseUser) {
+    const user = await this.getById(id, false);
+
+    if (currentUser.role !== Role.ADMIN && user.id !== currentUser.userId) {
+      throw new ForbiddenException('You can only delete your own user');
+    }
 
     return await this.prisma.$transaction(async (tx) => {
       await tx.article.updateMany({
